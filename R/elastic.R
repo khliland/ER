@@ -11,12 +11,33 @@
 #' @param family Type of model response, default = 'multinomial'.
 #' @param ... Additional arguments for \code{pls::cvsegments}.
 #'
+#' @seealso \code{\link{ER}}, \code{\link{pls}} and \code{\link{confints}}.
+#'
 #' @importFrom glmnet cv.glmnet
+#' @examples
+#' ## Multiple Sclerosis data
+#' data(MS, package = "ER")
+#' er <- ER(proteins ~ MS * cluster, data = MS)
+#' elasticMod <- elastic(er, 'MS', validation = "CV")
+#' sum(elasticMod$classes == MS$MS)
+#' plot(elasticMod)            # Model fit
+#' plot(elasticMod$glmnet.fit) # Coefficient trajectories
+#'
+#' # Select all proteins with non-zeros coefficients
+#' coefs     <- coef(elasticMod,s='lambda.min',exact=TRUE)
+#' (selected <- rownames(coefs[[1]])[unique(unlist(lapply(coefs,
+#'                       function(x)which(as.vector(x) != 0))))][-1])
+#'
+#' \donttest{
+#' ## Diabetes data
+#' data(Diabetes, package = "ER")
+#' er.Dia <- ER(transcriptome ~ surgery * T2D, data = Diabetes)
+#' elasticMod <- elastic(er.Dia, 'T2D', validation = "LOO")
+#' }
 #' @export
 elastic <- function(er, ...){
   UseMethod("elastic")
 }
-# setGeneric("elastic")
 
 #' @rdname elastic
 #' @method elastic ER

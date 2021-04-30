@@ -16,7 +16,7 @@ both on two levels: bariatric surgery on two levels (before and after the bariat
 surgery) and type 2 diabetes (T2D) on two levels (with and without T2D). There were
 8 patients without T2D and 7 with T2D. It was discovered that the patients with T2D
 would be separated in two groups: 3 patients in the group called T2D1 and 4 patients
-in the group called T2D2. The experiment can therefor also analysed as 2 way factorial
+in the group called T2D2. The experiment can therefore also analysed as 2 way factorial
 design where the disease factor is on three levels. All patients were obese before
 bariatric surgery (BMI >45). Transcriptome in the subcutaneous adipose tissue were
 obtained before and one year after bariatric surgery.

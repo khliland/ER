@@ -1,0 +1,11 @@
+Version 1.1.0
+================
+Date: 2021.03.11
+
+Changes:
+-------
+- Added dataset and examples on Multiple Sclerosis, plus examples on Diabetes and Lactobacillus
+- Added print.ER
+- Adjusted behaviour of plot.ER
+- Extended possibilities of confints
+- Added reference

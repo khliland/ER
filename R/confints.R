@@ -12,13 +12,16 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("A", "Left", "Right"))
 #' @param y Not used.
 #' @param xlab X label (\code{character})
 #' @param ylab Y label (\code{character})
-#' @param sorted Logical indicating if intervals should be sorted according to their mean values.
+#' @param sorted Logical indicating if intervals should be sorted according to their mean values, or a vector of indices/labels to sort by.
+#' @param labels Logical indicating if sample labels should be used on x axis.
 #' @param nonZero Logical indicating if intervals are required not to include zero.
 #' @param xlim Limits of the horizontal scale.
 #' @param ylim Limits of the vertical scale.
 #' @param text.pt Size scaling of text in the plot (default = 16).
 #' @param df.used Optional argument indicating how many degrees of freedom have been consumed during deflation. Default = 0.
 #' @param ... Further arguments to \code{qplot}.
+#'
+#' @seealso \code{\link{ER}}, \code{\link{elastic}} and \code{\link{pls}}.
 #'
 #' @return An object of class \code{confints}, which holds
 #' the information needed to perform statistics or plot the
@@ -28,6 +31,20 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("A", "Left", "Right"))
 #' @import ggplot2
 #' @importFrom scales squish
 #' @importFrom gridExtra grid.arrange
+#' @examples
+#' data(MS)
+#' # Compare MS and non-MS patients within cluster 1
+#' conf <- with(MS, confints(proteins[MS == "yes" & cluster == 1,],
+#'                           proteins[MS == "no"  & cluster == 1,]))
+#' p1 <- plot(conf)
+#' p2 <- plot(conf, nonZero = TRUE) # Only intervals without 0.
+#' grid.arrange(p1,p2)
+#'
+#' # Shorter plot with labels
+#' confShort <- conf[1:10,]
+#' p1 <- plot(confShort, labels = TRUE)
+#' p2 <- plot(confShort, labels = TRUE, nonZero = TRUE)
+#' grid.arrange(p1,p2)
 #' @export
 confints <-function(X1, X2, confidence = 0.95, df.used = 0){
   k <- dim(X1)[2]
@@ -49,10 +66,13 @@ confints <-function(X1, X2, confidence = 0.95, df.used = 0){
 
 #' @export
 #' @rdname confints
-plot.confints <- function(x, y, xlab = '', ylab = 'normalised log2', sorted = TRUE, nonZero = FALSE,
-                          xlim = NULL, ylim = NULL, text.pt = 16, ...){
-  if(sorted)
+plot.confints <- function(x, y, xlab = '', ylab = 'normalised log2', sorted = TRUE, labels = FALSE, nonZero = FALSE,
+                          xlim = NULL, ylim = NULL, text.pt = 12, ...){
+  if(is.logical(sorted) && sorted){
     x <- x[order(x$A),,drop=FALSE]
+  } else {
+    x <- x[sorted,,drop=FALSE]
+  }
   if(nonZero){
     x <- x[x$Left>=0 | x$Right <= 0,,drop=FALSE]
     if(dim(x)[1] == 0){
@@ -67,6 +87,9 @@ plot.confints <- function(x, y, xlab = '', ylab = 'normalised log2', sorted = TR
   }
   if(!is.null(ylim)){
     h <- h + scale_y_continuous(limits = ylim, oob=squish, expand=c(0,0))
+  }
+  if(labels){
+    h <- h + scale_x_continuous(labels = rownames(x), breaks = 1:nrow(x)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size=text.pt))
   }
   h + theme(text = element_text(size=text.pt))
 }
