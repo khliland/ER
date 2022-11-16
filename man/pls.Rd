@@ -42,33 +42,44 @@ pls(er, ...)
 \item{df.used}{Optional argument indicating how many degrees of freedom have been consumed during deflation. Default value from input object.}
 }
 \description{
-Partial Least Squares modelling of ER objects.
+The output of \code{ER} is used as input to a PLS classification with the selected
+effect as response. It is possible to compare two models using the \code{er2} argument. Variable
+selection is available through Jackknifing (from package \code{pls}) and Shaving (from package \code{plsVarSel}).
+}
+\details{
+If using the \code{shave} options, the segment type is given as \code{type} instead of \code{segment.type} (see examples).
 }
 \examples{
 data(MS, package = "ER")
 er <- ER(proteins ~ MS * cluster, data = MS[-1,])
 
+# Simple PLS using interleaved cross-validation
 plsMod <- pls(er, 'MS', 6, validation = "CV",
+              segment.type = "interleaved", length.seg = 25)
+scoreplot(plsMod, labels = "names")
+
+# PLS with shaving of variables (mind different variable for cross-validation type)
+plsModS <- pls(er, 'MS', 6, validation = "CV",
               type = "interleaved", length.seg=25, shave = TRUE)
 # Error as a function of remaining variables
-plot(plsMod$shave)
+plot(plsModS$shave)
 # Selected variables for minimum error
-with(plsMod$shave, colnames(X)[variables[[min.red+1]]])
+with(plsModS$shave, colnames(X)[variables[[min.red+1]]])
 
-\donttest{
-plsMod <- pls(er, 'MS', 5, validation = "LOO",
-              type = "interleaved", length.seg=25, jackknife = TRUE)
-colSums(plsMod$classes == as.numeric(MS$MS[-1]))
+\donttest{ # Time consuming due to leave-one-out cross-validation
+plsModJ <- pls(er, 'MS', 5, validation = "LOO",
+              jackknife = TRUE)
+colSums(plsModJ$classes == as.numeric(MS$MS[-1]))
 # Jackknifed coefficient P-values (sorted)
-plot(sort(plsMod$jack[,1,1]), pch = '.', ylab = 'P-value')
+plot(sort(plsModJ$jack[,1,1]), pch = '.', ylab = 'P-value')
 abline(h=c(0.01,0.05),col=2:3)
 
-scoreplot(plsMod)
-scoreplot(plsMod, comps=c(1,3))   # Selected components
+scoreplot(plsModJ)
+scoreplot(plsModJ, comps=c(1,3))   # Selected components
 # Use MS categories for colouring and clusters for plot characters.
-scoreplot(plsMod, col = er$symbolicDesign[['MS']],
+scoreplot(plsModJ, col = er$symbolicDesign[['MS']],
                   pch = 20+as.numeric(er$symbolicDesign[['cluster']]))
-loadingplot(plsMod, scatter=TRUE) # scatter=TRUE for scatter plot
+loadingplot(plsModJ, scatter=TRUE) # scatter=TRUE for scatter plot
 }
 }
 \seealso{
